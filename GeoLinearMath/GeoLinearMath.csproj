@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+
+		<PackageId>GeoLinearMath</PackageId>
+		<Version>0.0.1</Version>
+		<Authors>JochCool</Authors>
+		<Description>Provides generic types for linear algebra and geometric algebra.</Description>
+		<RepositoryUrl>https://github.com/JochCool/GeoLinearMath</RepositoryUrl>
+	</PropertyGroup>
+
+</Project>
