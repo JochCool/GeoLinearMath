@@ -51,7 +51,13 @@ public struct Vector<T> : IVector<Vector<T>, T>
 	public readonly T SquareMagnitude => X * X + Y * Y;
 
 	/// <inheritdoc/>
-	public readonly T TaxicabMagnitude => T.Abs(X) + T.Abs(Y);
+	public readonly T SquareMagnitudeChecked => checked(X * X + Y * Y);
+
+	/// <inheritdoc/>
+	public readonly T TaxicabMagnitude => (T.IsNegative(X) ? -X : X) + (T.IsNegative(Y) ? -Y : Y); // can't use T.Abs because it needs to be unchecked
+
+	/// <inheritdoc/>
+	public readonly T TaxicabMagnitudeChecked => checked(T.Abs(X) + T.Abs(Y));
 
 	static int IVector<Vector<T>, T>.Dimension => 2;
 
@@ -181,15 +187,36 @@ public struct Vector<T> : IVector<Vector<T>, T>
 	public static Vector<T> operator -(Vector<T> value) => new Vector<T>(-value.X, -value.Y);
 
 	/// <inheritdoc/>
+	public static Vector<T> operator checked -(Vector<T> value) => checked(new Vector<T>(-value.X, -value.Y));
+
+	/// <inheritdoc/>
 	public static Vector<T> operator +(Vector<T> left, Vector<T> right)
 	{
 		return new Vector<T>(left.X + right.X, left.Y + right.Y);
 	}
 
 	/// <inheritdoc/>
+	public static Vector<T> operator checked +(Vector<T> left, Vector<T> right)
+	{
+		checked
+		{
+			return new Vector<T>(left.X + right.X, left.Y + right.Y);
+		}
+	}
+
+	/// <inheritdoc/>
 	public static Vector<T> operator -(Vector<T> left, Vector<T> right)
 	{
 		return new Vector<T>(left.X - right.X, left.Y - right.Y);
+	}
+
+	/// <inheritdoc/>
+	public static Vector<T> operator checked -(Vector<T> left, Vector<T> right)
+	{
+		checked
+		{
+			return new Vector<T>(left.X - right.X, left.Y - right.Y);
+		}
 	}
 
 	// TODO
@@ -199,7 +226,7 @@ public struct Vector<T> : IVector<Vector<T>, T>
 	//}
 
 	/// <summary>
-	/// Multiplies a vector by a scalar value.
+	/// Multiplies a vector by a scalar value in an unchecked context.
 	/// </summary>
 	/// <param name="left">The vector to scale.</param>
 	/// <param name="right">The value to scale the vector by.</param>
@@ -210,7 +237,21 @@ public struct Vector<T> : IVector<Vector<T>, T>
 	}
 
 	/// <summary>
-	/// Multiplies a vector by a scalar value.
+	/// Multiplies a vector by a scalar value in a checked context.
+	/// </summary>
+	/// <param name="left">The vector to scale.</param>
+	/// <param name="right">The value to scale the vector by.</param>
+	/// <returns>The value of <paramref name="left"/> scaled by <paramref name="right"/>.</returns>
+	public static Vector<T> operator checked *(Vector<T> left, T right)
+	{
+		checked
+		{
+			return new Vector<T>(left.X * right, left.Y * right);
+		}
+	}
+
+	/// <summary>
+	/// Multiplies a vector by a scalar value in an unchecked context.
 	/// </summary>
 	/// <param name="left">The value to scale the vector by.</param>
 	/// <param name="right">The vector to scale.</param>
@@ -221,7 +262,21 @@ public struct Vector<T> : IVector<Vector<T>, T>
 	}
 
 	/// <summary>
-	/// Divides a vector by a scalar value.
+	/// Multiplies a vector by a scalar value in a checked context.
+	/// </summary>
+	/// <param name="left">The value to scale the vector by.</param>
+	/// <param name="right">The vector to scale.</param>
+	/// <returns>The value of <paramref name="right"/> scaled by <paramref name="left"/>.</returns>
+	public static Vector<T> operator checked *(T left, Vector<T> right)
+	{
+		checked
+		{
+			return new Vector<T>(left * right.X, left * right.Y);
+		}
+	}
+
+	/// <summary>
+	/// Divides a vector by a scalar value in an unchecked context.
 	/// </summary>
 	/// <param name="left">The vector to scale.</param>
 	/// <param name="right">The inverse value to scale the vector by.</param>
@@ -232,7 +287,21 @@ public struct Vector<T> : IVector<Vector<T>, T>
 	}
 
 	/// <summary>
-	/// Divides a scalar value by a vector in VGA.
+	/// Divides a vector by a scalar value in a checked context.
+	/// </summary>
+	/// <param name="left">The vector to scale.</param>
+	/// <param name="right">The inverse value to scale the vector by.</param>
+	/// <returns>The value of <paramref name="left"/> scaled by the inverse of <paramref name="right"/>.</returns>
+	public static Vector<T> operator checked /(Vector<T> left, T right)
+	{
+		checked
+		{
+			return new Vector<T>(left.X / right, left.Y / right);
+		}
+	}
+
+	/// <summary>
+	/// Divides a scalar value by a vector in VGA in an unchecked context.
 	/// </summary>
 	/// <param name="left">The value which <paramref name="right"/> divides.</param>
 	/// <param name="right">The value which divides <paramref name="left"/>.</param>
@@ -243,7 +312,21 @@ public struct Vector<T> : IVector<Vector<T>, T>
 	}
 
 	/// <summary>
-	/// Calculates the multiplicative inverse of a vector in VGA.
+	/// Divides a scalar value by a vector in VGA in a checked context.
+	/// </summary>
+	/// <param name="left">The value which <paramref name="right"/> divides.</param>
+	/// <param name="right">The value which divides <paramref name="left"/>.</param>
+	/// <returns>The quotient of <paramref name="left"/> divided by <paramref name="right"/>.</returns>
+	public static Vector<T> operator checked /(T left, Vector<T> right)
+	{
+		checked
+		{
+			return left * right / right.SquareMagnitudeChecked;
+		}
+	}
+
+	/// <summary>
+	/// Calculates the multiplicative inverse of a vector in VGA in an unchecked context.
 	/// </summary>
 	/// <param name="value">The value of which to get the multiplicative inverse.</param>
 	/// <returns>The multiplicative inverse of <paramref name="value"/>.</returns>
@@ -252,14 +335,36 @@ public struct Vector<T> : IVector<Vector<T>, T>
 		return value / value.SquareMagnitude;
 	}
 
+	/// <summary>
+	/// Calculates the multiplicative inverse of a vector in VGA in a checked context.
+	/// </summary>
+	/// <param name="value">The value of which to get the multiplicative inverse.</param>
+	/// <returns>The multiplicative inverse of <paramref name="value"/>.</returns>
+	public static Vector<T> ReciprocalChecked(Vector<T> value)
+	{
+		checked
+		{
+			return value / value.SquareMagnitudeChecked;
+		}
+	}
+
 	/// <inheritdoc/>
 	public static T Dot(Vector<T> left, Vector<T> right)
 	{
 		return left.X * right.X + left.Y * right.Y;
 	}
 
+	/// <inheritdoc/>
+	public static T DotChecked(Vector<T> left, Vector<T> right)
+	{
+		checked
+		{
+			return left.X * right.X + left.Y * right.Y;
+		}
+	}
+
 	/// <summary>
-	/// Calculates the determinant of a 2×2 matrix defined by two vectors.
+	/// Calculates the determinant of a 2×2 matrix defined by two vectors, in an unchecked context.
 	/// </summary>
 	/// <param name="a">The first vector of the matrix.</param>
 	/// <param name="b">The second vector of the matrix.</param>
@@ -267,6 +372,20 @@ public struct Vector<T> : IVector<Vector<T>, T>
 	public static T Determinant(Vector<T> a, Vector<T> b)
 	{
 		return a.X * b.Y - a.Y * b.X;
+	}
+
+	/// <summary>
+	/// Calculates the determinant of a 2×2 matrix defined by two vectors, in a checked context.
+	/// </summary>
+	/// <param name="a">The first vector of the matrix.</param>
+	/// <param name="b">The second vector of the matrix.</param>
+	/// <returns>The determinant.</returns>
+	public static T DeterminantChecked(Vector<T> a, Vector<T> b)
+	{
+		checked
+		{
+			return a.X * b.Y - a.Y * b.X;
+		}
 	}
 
 	#endregion

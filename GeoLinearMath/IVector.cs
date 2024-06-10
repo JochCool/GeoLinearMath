@@ -59,17 +59,32 @@ public interface IVector<TSelf, T> :
 	IEnumerable<T> Components { get; }
 
 	/// <summary>
-	/// Gets the square of the magnitude of this vector in Euclidean distance.
+	/// Gets the square of the magnitude of this vector in Euclidean distance, in an unchecked context.
 	/// </summary>
 	T SquareMagnitude { get; }
 
 	/// <summary>
-	/// Gets the magnitude of this vector in taxicab distance (also known as Manhattan distance).
+	/// Gets the square of the magnitude of this vector in Euclidean distance, in a checked context.
+	/// </summary>
+	/// <exception cref="OverflowException">The result is not representable by <typeparamref name="T"/>.</exception>
+	T SquareMagnitudeChecked => SquareMagnitude;
+
+	/// <summary>
+	/// Gets the magnitude of this vector in taxicab distance (also known as Manhattan distance), in an unchecked context.
 	/// </summary>
 	/// <remarks>
 	/// <para>This is equal to the amount of unit-sized steps along an axis needed to take to get from <see cref="Origin"/> to this vector.</para>
 	/// </remarks>
 	T TaxicabMagnitude { get; }
+
+	/// <summary>
+	/// Gets the magnitude of this vector in taxicab distance (also known as Manhattan distance), in a checked context.
+	/// </summary>
+	/// <remarks>
+	/// <para>This is equal to the amount of unit-sized steps along an axis needed to take to get from <see cref="Origin"/> to this vector.</para>
+	/// </remarks>
+	/// <exception cref="OverflowException">The result is not representable by <typeparamref name="T"/>.</exception>
+	T TaxicabMagnitudeChecked => TaxicabMagnitude;
 
 	/// <summary>
 	/// Tests whether this vector is in a rectangular box defined by two other vectors.
@@ -89,10 +104,18 @@ public interface IVector<TSelf, T> :
 	static abstract TSelf Clamp(TSelf value, TSelf min, TSelf max);
 
 	/// <summary>
-	/// Calculates the dot product, or inner product, of two vectors.
+	/// Calculates the dot product, or inner product, of two vectors, in an unchecked context.
 	/// </summary>
 	/// <param name="left">The vector to multiply by <paramref name="right"/>.</param>
 	/// <param name="right">The vector to multiply by <paramref name="left"/>.</param>
 	/// <returns>The dot product.</returns>
 	static abstract T Dot(TSelf left, TSelf right);
+
+	/// <summary>
+	/// Calculates the dot product, or inner product, of two vectors, in a checked context.
+	/// </summary>
+	/// <param name="left">The vector to multiply by <paramref name="right"/>.</param>
+	/// <param name="right">The vector to multiply by <paramref name="left"/>.</param>
+	/// <returns>The dot product.</returns>
+	static virtual T DotChecked(TSelf left, TSelf right) => TSelf.Dot(left, right);
 }
