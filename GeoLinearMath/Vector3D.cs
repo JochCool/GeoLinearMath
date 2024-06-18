@@ -74,6 +74,12 @@ public struct Vector3D<T> : IVector<Vector3D<T>, T>
 	public readonly T SquareMagnitudeChecked => checked(X * X + Y * Y + Z * Z);
 
 	/// <inheritdoc/>
+	public readonly T Magnitude => MathUtil.Sqrt(SquareMagnitude);
+
+	/// <inheritdoc/>
+	public readonly T MagnitudeChecked => MathUtil.SqrtChecked(SquareMagnitudeChecked);
+
+	/// <inheritdoc/>
 	public readonly T TaxicabMagnitude => (T.IsNegative(X) ? -X : X) + (T.IsNegative(Y) ? -Y : Y) + (T.IsNegative(Z) ? -Z : Z); // can't use T.Abs because it needs to be unchecked
 
 	/// <inheritdoc/>
@@ -367,7 +373,7 @@ public struct Vector3D<T> : IVector<Vector3D<T>, T>
 	/// <inheritdoc/>
 	public readonly bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
 	{
-		return VectorUtil.TryFormat(destination, out charsWritten, [X, Y, Z], format, provider);
+		return StringUtil.TryFormatVector(destination, out charsWritten, [X, Y, Z], format, provider);
 	}
 
 	/// <summary>
@@ -423,7 +429,7 @@ public struct Vector3D<T> : IVector<Vector3D<T>, T>
 	{
 		VectorFormatInfo vectorFormatInfo = VectorFormatInfo.GetInstance(provider);
 
-		s = VectorUtil.RemoveOpeningAndClosing(s, vectorFormatInfo);
+		s = StringUtil.RemoveOpeningAndClosing(s, vectorFormatInfo);
 
 		ReadOnlySpan<char> separator = vectorFormatInfo.Separator;
 

@@ -9,7 +9,7 @@ namespace GeoLinearMath;
 /// </summary>
 /// <typeparam name="TSelf">The type that implements this interface.</typeparam>
 /// <typeparam name="T">The type of the components of this vector type.</typeparam>
-public interface IVector<TSelf, T> :
+public interface IVector<TSelf, T> : IQuantity<T>,
 	IAdditiveIdentity<TSelf, TSelf>,
 	IAdditionOperators<TSelf, TSelf, TSelf>,
 	ISubtractionOperators<TSelf, TSelf, TSelf>,
@@ -59,17 +59,6 @@ public interface IVector<TSelf, T> :
 	IEnumerable<T> Components { get; }
 
 	/// <summary>
-	/// Gets the square of the magnitude of this vector in Euclidean distance, in an unchecked context.
-	/// </summary>
-	T SquareMagnitude { get; }
-
-	/// <summary>
-	/// Gets the square of the magnitude of this vector in Euclidean distance, in a checked context.
-	/// </summary>
-	/// <exception cref="OverflowException">The result is not representable by <typeparamref name="T"/>.</exception>
-	T SquareMagnitudeChecked => SquareMagnitude;
-
-	/// <summary>
 	/// Gets the magnitude of this vector in taxicab distance (also known as Manhattan distance), in an unchecked context.
 	/// </summary>
 	/// <remarks>
@@ -109,6 +98,7 @@ public interface IVector<TSelf, T> :
 	/// <param name="left">The vector to multiply by <paramref name="right"/>.</param>
 	/// <param name="right">The vector to multiply by <paramref name="left"/>.</param>
 	/// <returns>The dot product.</returns>
+	/// <exception cref="OverflowException">The result is not representable by <typeparamref name="T"/>.</exception>
 	static abstract T Dot(TSelf left, TSelf right);
 
 	/// <summary>
@@ -117,5 +107,6 @@ public interface IVector<TSelf, T> :
 	/// <param name="left">The vector to multiply by <paramref name="right"/>.</param>
 	/// <param name="right">The vector to multiply by <paramref name="left"/>.</param>
 	/// <returns>The dot product.</returns>
+	/// <exception cref="OverflowException">The result is not representable by <typeparamref name="T"/>.</exception>
 	static virtual T DotChecked(TSelf left, TSelf right) => TSelf.Dot(left, right);
 }

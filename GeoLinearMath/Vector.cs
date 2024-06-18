@@ -11,7 +11,11 @@ namespace GeoLinearMath;
 /// </summary>
 /// <typeparam name="T">The type of number that this is a vector of.</typeparam>
 /// <seealso cref="Vector3D{T}"/>
-public struct Vector<T> : IVector<Vector<T>, T>
+public struct Vector<T> : IVector<Vector<T>, T>,
+	IMultiplyOperators<Vector<T>, Vector<T>, ComplexNumber<T>>,
+	IMultiplyOperators<Vector<T>, ComplexNumber<T>, Vector<T>>,
+	IDivisionOperators<Vector<T>, Vector<T>, ComplexNumber<T>>,
+	IDivisionOperators<Vector<T>, ComplexNumber<T>, Vector<T>>
 	where T : INumber<T>
 {
 	/// <summary>
@@ -52,6 +56,12 @@ public struct Vector<T> : IVector<Vector<T>, T>
 
 	/// <inheritdoc/>
 	public readonly T SquareMagnitudeChecked => checked(X * X + Y * Y);
+
+	/// <inheritdoc/>
+	public readonly T Magnitude => MathUtil.Sqrt(SquareMagnitude);
+
+	/// <inheritdoc/>
+	public readonly T MagnitudeChecked => MathUtil.SqrtChecked(SquareMagnitudeChecked);
 
 	/// <inheritdoc/>
 	public readonly T TaxicabMagnitude => (T.IsNegative(X) ? -X : X) + (T.IsNegative(Y) ? -Y : Y); // can't use T.Abs because it needs to be unchecked
@@ -219,11 +229,28 @@ public struct Vector<T> : IVector<Vector<T>, T>
 		}
 	}
 
-	// TODO
-	//public static ComplexNumber<T> operator *(Vector<T> left, Vector<T> right)
-	//{
-	//	return new ComplexNumber<T>(Dot(left, right), Determinant(left, right));
-	//}
+	/// <summary>
+	/// Computes the geometric product in VGA of two vectors in an unchecked context.
+	/// </summary>
+	/// <param name="left">The vector to multiply by <paramref name="right"/>.</param>
+	/// <param name="right">The vector that <paramref name="right"/> should be multiplied by.</param>
+	/// <returns>The geometric product of <paramref name="left"/> and <paramref name="right"/>.</returns>
+	public static ComplexNumber<T> operator *(Vector<T> left, Vector<T> right)
+	{
+		return new ComplexNumber<T>(Dot(left, right), Determinant(left, right));
+	}
+
+	/// <summary>
+	/// Computes the geometric product in VGA of two vectors in a checked context.
+	/// </summary>
+	/// <param name="left">The vector to multiply by <paramref name="right"/>.</param>
+	/// <param name="right">The vector that <paramref name="right"/> should be multiplied by.</param>
+	/// <returns>The geometric product of <paramref name="left"/> and <paramref name="right"/>.</returns>
+	/// <exception cref="OverflowException">The result is not representable by <typeparamref name="T"/>.</exception>
+	public static ComplexNumber<T> operator checked *(Vector<T> left, Vector<T> right)
+	{
+		return new ComplexNumber<T>(DotChecked(left, right), DeterminantChecked(left, right));
+	}
 
 	/// <summary>
 	/// Multiplies a vector by a scalar value in an unchecked context.
@@ -276,6 +303,64 @@ public struct Vector<T> : IVector<Vector<T>, T>
 	}
 
 	/// <summary>
+	/// Multiplies a vector by a complex number in VGA in an unchecked context.
+	/// </summary>
+	/// <param name="left">The vector to multiply by <paramref name="right"/>.</param>
+	/// <param name="right">The complex number to multiply by <paramref name="left"/>.</param>
+	/// <returns>The product of <paramref name="left"/> and <paramref name="right"/>.</returns>
+	public static Vector<T> operator *(Vector<T> left, ComplexNumber<T> right)
+	{
+		Vector<T> result;
+		result.X = left.X * right.Real - left.Y * right.Imaginary;
+		result.Y = left.Y * right.Real + left.X * right.Imaginary;
+		return result;
+	}
+
+	/// <summary>
+	/// Multiplies a vector by a complex number in VGA in a checked context.
+	/// </summary>
+	/// <param name="left">The vector to multiply by <paramref name="right"/>.</param>
+	/// <param name="right">The complex number to multiply by <paramref name="left"/>.</param>
+	/// <returns>The product of <paramref name="left"/> and <paramref name="right"/>.</returns>
+	/// <exception cref="OverflowException">The result is not representable by <typeparamref name="T"/>.</exception>
+	public static Vector<T> operator checked *(Vector<T> left, ComplexNumber<T> right)
+	{
+		checked
+		{
+			Vector<T> result;
+			result.X = left.X * right.Real - left.Y * right.Imaginary;
+			result.Y = left.Y * right.Real + left.X * right.Imaginary;
+			return result;
+		}
+	}
+
+	/// <summary>
+	/// Divides a vector by another vector in VGA in an unchecked context.
+	/// </summary>
+	/// <param name="left">The value which <paramref name="right"/> divides.</param>
+	/// <param name="right">The value which divides <paramref name="left"/>.</param>
+	/// <returns>The quotient of <paramref name="left"/> divided by <paramref name="right"/>.</returns>
+	public static ComplexNumber<T> operator /(Vector<T> left, Vector<T> right)
+	{
+		return left * right / right.SquareMagnitude;
+	}
+
+	/// <summary>
+	/// Divides a vector by another vector in VGA in a checked context.
+	/// </summary>
+	/// <param name="left">The value which <paramref name="right"/> divides.</param>
+	/// <param name="right">The value which divides <paramref name="left"/>.</param>
+	/// <returns>The quotient of <paramref name="left"/> divided by <paramref name="right"/>.</returns>
+	/// <exception cref="OverflowException">The result is not representable by <typeparamref name="T"/>.</exception>
+	public static ComplexNumber<T> operator checked /(Vector<T> left, Vector<T> right)
+	{
+		checked
+		{
+			return left * right / right.SquareMagnitude;
+		}
+	}
+
+	/// <summary>
 	/// Divides a vector by a scalar value in an unchecked context.
 	/// </summary>
 	/// <param name="left">The vector to scale.</param>
@@ -322,6 +407,32 @@ public struct Vector<T> : IVector<Vector<T>, T>
 		checked
 		{
 			return left * right / right.SquareMagnitudeChecked;
+		}
+	}
+
+	/// <summary>
+	/// Divides a vector by a complex number in VGA in an unchecked context.
+	/// </summary>
+	/// <param name="left">The value which <paramref name="right"/> divides.</param>
+	/// <param name="right">The value which divides <paramref name="left"/>.</param>
+	/// <returns>The quotient of <paramref name="left"/> divided by <paramref name="right"/>.</returns>
+	public static Vector<T> operator /(Vector<T> left, ComplexNumber<T> right)
+	{
+		return right * left / right.SquareMagnitude;
+	}
+
+	/// <summary>
+	/// Divides a vector by a complex number in VGA in a checked context.
+	/// </summary>
+	/// <param name="left">The value which <paramref name="right"/> divides.</param>
+	/// <param name="right">The value which divides <paramref name="left"/>.</param>
+	/// <returns>The quotient of <paramref name="left"/> divided by <paramref name="right"/>.</returns>
+	/// <exception cref="OverflowException">The result is not representable by <typeparamref name="T"/>.</exception>
+	public static Vector<T> operator checked /(Vector<T> left, ComplexNumber<T> right)
+	{
+		checked
+		{
+			return right * left / right.SquareMagnitudeChecked;
 		}
 	}
 
@@ -458,7 +569,7 @@ public struct Vector<T> : IVector<Vector<T>, T>
 	/// <inheritdoc/>
 	public readonly bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
 	{
-		return VectorUtil.TryFormat(destination, out charsWritten, [X, Y], format, provider);
+		return StringUtil.TryFormatVector(destination, out charsWritten, [X, Y], format, provider);
 	}
 
 	/// <summary>
@@ -514,7 +625,7 @@ public struct Vector<T> : IVector<Vector<T>, T>
 	{
 		VectorFormatInfo vectorFormatInfo = VectorFormatInfo.GetInstance(provider);
 
-		s = VectorUtil.RemoveOpeningAndClosing(s, vectorFormatInfo);
+		s = StringUtil.RemoveOpeningAndClosing(s, vectorFormatInfo);
 
 		ReadOnlySpan<char> separator = vectorFormatInfo.Separator;
 
