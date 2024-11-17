@@ -116,7 +116,7 @@ public struct Vector<T> : IVector<Vector<T>, T>,
 	/// <param name="components">A span containing two elements, which are the components of the vector.</param>
 	/// <returns>The created vector.</returns>
 	/// <exception cref="ArgumentException"><paramref name="components"/> does not contain two elements.</exception>
-	public static Vector<T> Create(ReadOnlySpan<T> components)
+	public static Vector<T> Create(params ReadOnlySpan<T> components)
 	{
 		if (components.Length != 2)
 		{

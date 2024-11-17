@@ -51,7 +51,7 @@ public interface IVector<TSelf, T> : IQuantity<T>,
 	/// <param name="components">The components of the vector.</param>
 	/// <returns>The created vector.</returns>
 	/// <exception cref="ArgumentException"><paramref name="components"/> is not a supported length.</exception>
-	abstract static TSelf Create(ReadOnlySpan<T> components);
+	abstract static TSelf Create(params ReadOnlySpan<T> components);
 
 	/// <summary>
 	/// Gets the components of the vector, in order.

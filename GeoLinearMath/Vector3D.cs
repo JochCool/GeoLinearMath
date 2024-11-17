@@ -144,7 +144,7 @@ public struct Vector3D<T> : IVector<Vector3D<T>, T>
 	/// <param name="components">A span containing three elements, which are the components of the vector.</param>
 	/// <returns>The created vector.</returns>
 	/// <exception cref="ArgumentException"><paramref name="components"/> does not contain three elements.</exception>
-	public static Vector3D<T> Create(ReadOnlySpan<T> components)
+	public static Vector3D<T> Create(params ReadOnlySpan<T> components)
 	{
 		if (components.Length != 3)
 		{
