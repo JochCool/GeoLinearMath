@@ -64,7 +64,7 @@ public interface IVector<TSelf, T> : IQuantity<T>,
 	/// <remarks>
 	/// <para>This is equal to the amount of unit-sized steps along an axis needed to take to get from <see cref="Origin"/> to this vector.</para>
 	/// </remarks>
-	T TaxicabMagnitude { get; }
+	T TaxicabMagnitudeUnchecked { get; }
 
 	/// <summary>
 	/// Gets the magnitude of this vector in taxicab distance (also known as Manhattan distance), in a checked context.
@@ -73,7 +73,7 @@ public interface IVector<TSelf, T> : IQuantity<T>,
 	/// <para>This is equal to the amount of unit-sized steps along an axis needed to take to get from <see cref="Origin"/> to this vector.</para>
 	/// </remarks>
 	/// <exception cref="OverflowException">The result is not representable by <typeparamref name="T"/>.</exception>
-	T TaxicabMagnitudeChecked => TaxicabMagnitude;
+	T TaxicabMagnitude => TaxicabMagnitudeUnchecked;
 
 	/// <summary>
 	/// Tests whether this vector is in a rectangular box defined by two other vectors.
@@ -99,7 +99,7 @@ public interface IVector<TSelf, T> : IQuantity<T>,
 	/// <param name="right">The vector to multiply by <paramref name="left"/>.</param>
 	/// <returns>The dot product.</returns>
 	/// <exception cref="OverflowException">The result is not representable by <typeparamref name="T"/>.</exception>
-	static abstract T Dot(TSelf left, TSelf right);
+	static abstract T DotUnchecked(TSelf left, TSelf right);
 
 	/// <summary>
 	/// Calculates the dot product, or inner product, of two vectors, in a checked context.
@@ -108,5 +108,5 @@ public interface IVector<TSelf, T> : IQuantity<T>,
 	/// <param name="right">The vector to multiply by <paramref name="left"/>.</param>
 	/// <returns>The dot product.</returns>
 	/// <exception cref="OverflowException">The result is not representable by <typeparamref name="T"/>.</exception>
-	static virtual T DotChecked(TSelf left, TSelf right) => TSelf.Dot(left, right);
+	static virtual T Dot(TSelf left, TSelf right) => TSelf.DotUnchecked(left, right);
 }

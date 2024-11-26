@@ -5,6 +5,7 @@
 		<TargetFramework>net9.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
 
 		<PackageId>GeoLinearMath</PackageId>
 		<Version>0.0.1</Version>

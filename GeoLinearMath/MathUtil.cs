@@ -15,7 +15,7 @@ public static class MathUtil
 	/// <param name="value">The value of which to calculate the square root.</param>
 	/// <returns>An approximation of the square root of <paramref name="value"/>.</returns>
 	/// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is negative.</exception>
-	public static T Sqrt<T>(T value) where T : INumber<T>
+	public static T SqrtUnchecked<T>(T value) where T : INumber<T>
 	{
 		ArgumentOutOfRangeException.ThrowIfNegative(value);
 
@@ -30,7 +30,7 @@ public static class MathUtil
 	/// <returns>An approximation of the square root of <paramref name="value"/>.</returns>
 	/// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is negative.</exception>
 	/// <exception cref="OverflowException">A value is not representable by <typeparamref name="T"/>.</exception>
-	public static T SqrtChecked<T>(T value) where T : INumber<T>
+	public static T Sqrt<T>(T value) where T : INumber<T>
 	{
 		ArgumentOutOfRangeException.ThrowIfNegative(value);
 

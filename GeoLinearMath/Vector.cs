@@ -52,22 +52,22 @@ public struct Vector<T> : IVector<Vector<T>, T>,
 	readonly IEnumerable<T> IVector<Vector<T>, T>.Components => [X, Y];
 
 	/// <inheritdoc/>
-	public readonly T SquareMagnitude => X * X + Y * Y;
+	public readonly T SquareMagnitudeUnchecked => unchecked(X * X + Y * Y);
 
 	/// <inheritdoc/>
-	public readonly T SquareMagnitudeChecked => checked(X * X + Y * Y);
+	public readonly T SquareMagnitude => checked(X * X + Y * Y);
+
+	/// <inheritdoc/>
+	public readonly T MagnitudeUnchecked => MathUtil.SqrtUnchecked(SquareMagnitudeUnchecked);
 
 	/// <inheritdoc/>
 	public readonly T Magnitude => MathUtil.Sqrt(SquareMagnitude);
 
 	/// <inheritdoc/>
-	public readonly T MagnitudeChecked => MathUtil.SqrtChecked(SquareMagnitudeChecked);
+	public readonly T TaxicabMagnitudeUnchecked => unchecked((T.IsNegative(X) ? -X : X) + (T.IsNegative(Y) ? -Y : Y)); // can't use T.Abs because it needs to be unchecked
 
 	/// <inheritdoc/>
-	public readonly T TaxicabMagnitude => (T.IsNegative(X) ? -X : X) + (T.IsNegative(Y) ? -Y : Y); // can't use T.Abs because it needs to be unchecked
-
-	/// <inheritdoc/>
-	public readonly T TaxicabMagnitudeChecked => checked(T.Abs(X) + T.Abs(Y));
+	public readonly T TaxicabMagnitude => checked(T.Abs(X) + T.Abs(Y));
 
 	static int IVector<Vector<T>, T>.Dimension => 2;
 
@@ -194,7 +194,7 @@ public struct Vector<T> : IVector<Vector<T>, T>,
 	public static Vector<T> operator +(Vector<T> value) => new Vector<T>(+value.X, +value.Y);
 
 	/// <inheritdoc/>
-	public static Vector<T> operator -(Vector<T> value) => new Vector<T>(-value.X, -value.Y);
+	public static Vector<T> operator -(Vector<T> value) => unchecked(new Vector<T>(-value.X, -value.Y));
 
 	/// <inheritdoc/>
 	public static Vector<T> operator checked -(Vector<T> value) => checked(new Vector<T>(-value.X, -value.Y));
@@ -202,7 +202,10 @@ public struct Vector<T> : IVector<Vector<T>, T>,
 	/// <inheritdoc/>
 	public static Vector<T> operator +(Vector<T> left, Vector<T> right)
 	{
-		return new Vector<T>(left.X + right.X, left.Y + right.Y);
+		unchecked
+		{
+			return new Vector<T>(left.X + right.X, left.Y + right.Y);
+		}
 	}
 
 	/// <inheritdoc/>
@@ -217,7 +220,10 @@ public struct Vector<T> : IVector<Vector<T>, T>,
 	/// <inheritdoc/>
 	public static Vector<T> operator -(Vector<T> left, Vector<T> right)
 	{
-		return new Vector<T>(left.X - right.X, left.Y - right.Y);
+		unchecked
+		{
+			return new Vector<T>(left.X - right.X, left.Y - right.Y);
+		}
 	}
 
 	/// <inheritdoc/>
@@ -237,7 +243,7 @@ public struct Vector<T> : IVector<Vector<T>, T>,
 	/// <returns>The geometric product of <paramref name="left"/> and <paramref name="right"/>.</returns>
 	public static ComplexNumber<T> operator *(Vector<T> left, Vector<T> right)
 	{
-		return new ComplexNumber<T>(Dot(left, right), Determinant(left, right));
+		return new ComplexNumber<T>(DotUnchecked(left, right), DeterminantUnchecked(left, right));
 	}
 
 	/// <summary>
@@ -249,7 +255,7 @@ public struct Vector<T> : IVector<Vector<T>, T>,
 	/// <exception cref="OverflowException">The result is not representable by <typeparamref name="T"/>.</exception>
 	public static ComplexNumber<T> operator checked *(Vector<T> left, Vector<T> right)
 	{
-		return new ComplexNumber<T>(DotChecked(left, right), DeterminantChecked(left, right));
+		return new ComplexNumber<T>(Dot(left, right), Determinant(left, right));
 	}
 
 	/// <summary>
@@ -260,7 +266,10 @@ public struct Vector<T> : IVector<Vector<T>, T>,
 	/// <returns>The value of <paramref name="left"/> scaled by <paramref name="right"/>.</returns>
 	public static Vector<T> operator *(Vector<T> left, T right)
 	{
-		return new Vector<T>(left.X * right, left.Y * right);
+		unchecked
+		{
+			return new Vector<T>(left.X * right, left.Y * right);
+		}
 	}
 
 	/// <summary>
@@ -285,7 +294,10 @@ public struct Vector<T> : IVector<Vector<T>, T>,
 	/// <returns>The value of <paramref name="right"/> scaled by <paramref name="left"/>.</returns>
 	public static Vector<T> operator *(T left, Vector<T> right)
 	{
-		return new Vector<T>(left * right.X, left * right.Y);
+		unchecked
+		{
+			return new Vector<T>(left * right.X, left * right.Y);
+		}
 	}
 
 	/// <summary>
@@ -310,10 +322,13 @@ public struct Vector<T> : IVector<Vector<T>, T>,
 	/// <returns>The product of <paramref name="left"/> and <paramref name="right"/>.</returns>
 	public static Vector<T> operator *(Vector<T> left, ComplexNumber<T> right)
 	{
-		Vector<T> result;
-		result.X = left.X * right.Real - left.Y * right.Imaginary;
-		result.Y = left.Y * right.Real + left.X * right.Imaginary;
-		return result;
+		unchecked
+		{
+			Vector<T> result;
+			result.X = left.X * right.Real - left.Y * right.Imaginary;
+			result.Y = left.Y * right.Real + left.X * right.Imaginary;
+			return result;
+		}
 	}
 
 	/// <summary>
@@ -342,7 +357,10 @@ public struct Vector<T> : IVector<Vector<T>, T>,
 	/// <returns>The quotient of <paramref name="left"/> divided by <paramref name="right"/>.</returns>
 	public static ComplexNumber<T> operator /(Vector<T> left, Vector<T> right)
 	{
-		return left * right / right.SquareMagnitude;
+		unchecked
+		{
+			return left * right / right.SquareMagnitudeUnchecked;
+		}
 	}
 
 	/// <summary>
@@ -356,7 +374,7 @@ public struct Vector<T> : IVector<Vector<T>, T>,
 	{
 		checked
 		{
-			return left * right / right.SquareMagnitude;
+			return left * right / right.SquareMagnitudeUnchecked;
 		}
 	}
 
@@ -368,7 +386,10 @@ public struct Vector<T> : IVector<Vector<T>, T>,
 	/// <returns>The value of <paramref name="left"/> scaled by the inverse of <paramref name="right"/>.</returns>
 	public static Vector<T> operator /(Vector<T> left, T right)
 	{
-		return new Vector<T>(left.X / right, left.Y / right);
+		unchecked
+		{
+			return new Vector<T>(left.X / right, left.Y / right);
+		}
 	}
 
 	/// <summary>
@@ -393,7 +414,10 @@ public struct Vector<T> : IVector<Vector<T>, T>,
 	/// <returns>The quotient of <paramref name="left"/> divided by <paramref name="right"/>.</returns>
 	public static Vector<T> operator /(T left, Vector<T> right)
 	{
-		return left * right / right.SquareMagnitude;
+		unchecked
+		{
+			return left * right / right.SquareMagnitudeUnchecked;
+		}
 	}
 
 	/// <summary>
@@ -406,7 +430,7 @@ public struct Vector<T> : IVector<Vector<T>, T>,
 	{
 		checked
 		{
-			return left * right / right.SquareMagnitudeChecked;
+			return left * right / right.SquareMagnitude;
 		}
 	}
 
@@ -418,7 +442,10 @@ public struct Vector<T> : IVector<Vector<T>, T>,
 	/// <returns>The quotient of <paramref name="left"/> divided by <paramref name="right"/>.</returns>
 	public static Vector<T> operator /(Vector<T> left, ComplexNumber<T> right)
 	{
-		return right * left / right.SquareMagnitude;
+		unchecked
+		{
+			return right * left / right.SquareMagnitudeUnchecked;
+		}
 	}
 
 	/// <summary>
@@ -432,7 +459,7 @@ public struct Vector<T> : IVector<Vector<T>, T>,
 	{
 		checked
 		{
-			return right * left / right.SquareMagnitudeChecked;
+			return right * left / right.SquareMagnitude;
 		}
 	}
 
@@ -441,9 +468,12 @@ public struct Vector<T> : IVector<Vector<T>, T>,
 	/// </summary>
 	/// <param name="value">The value of which to get the multiplicative inverse.</param>
 	/// <returns>The multiplicative inverse of <paramref name="value"/>.</returns>
-	public static Vector<T> Reciprocal(Vector<T> value)
+	public static Vector<T> ReciprocalUnchecked(Vector<T> value)
 	{
-		return value / value.SquareMagnitude;
+		unchecked
+		{
+			return value / value.SquareMagnitudeUnchecked;
+		}
 	}
 
 	/// <summary>
@@ -451,22 +481,25 @@ public struct Vector<T> : IVector<Vector<T>, T>,
 	/// </summary>
 	/// <param name="value">The value of which to get the multiplicative inverse.</param>
 	/// <returns>The multiplicative inverse of <paramref name="value"/>.</returns>
-	public static Vector<T> ReciprocalChecked(Vector<T> value)
+	public static Vector<T> Reciprocal(Vector<T> value)
 	{
 		checked
 		{
-			return value / value.SquareMagnitudeChecked;
+			return value / value.SquareMagnitude;
+		}
+	}
+
+	/// <inheritdoc/>
+	public static T DotUnchecked(Vector<T> left, Vector<T> right)
+	{
+		unchecked
+		{
+			return left.X * right.X + left.Y * right.Y;
 		}
 	}
 
 	/// <inheritdoc/>
 	public static T Dot(Vector<T> left, Vector<T> right)
-	{
-		return left.X * right.X + left.Y * right.Y;
-	}
-
-	/// <inheritdoc/>
-	public static T DotChecked(Vector<T> left, Vector<T> right)
 	{
 		checked
 		{
@@ -480,9 +513,12 @@ public struct Vector<T> : IVector<Vector<T>, T>,
 	/// <param name="a">The first vector of the matrix.</param>
 	/// <param name="b">The second vector of the matrix.</param>
 	/// <returns>The determinant.</returns>
-	public static T Determinant(Vector<T> a, Vector<T> b)
+	public static T DeterminantUnchecked(Vector<T> a, Vector<T> b)
 	{
-		return a.X * b.Y - a.Y * b.X;
+		unchecked
+		{
+			return a.X * b.Y - a.Y * b.X;
+		}
 	}
 
 	/// <summary>
@@ -491,7 +527,7 @@ public struct Vector<T> : IVector<Vector<T>, T>,
 	/// <param name="a">The first vector of the matrix.</param>
 	/// <param name="b">The second vector of the matrix.</param>
 	/// <returns>The determinant.</returns>
-	public static T DeterminantChecked(Vector<T> a, Vector<T> b)
+	public static T Determinant(Vector<T> a, Vector<T> b)
 	{
 		checked
 		{

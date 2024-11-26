@@ -43,16 +43,16 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 	}
 
 	/// <inheritdoc/>
-	public readonly T SquareMagnitude => Real * Real + Imaginary * Imaginary;
+	public readonly T SquareMagnitudeUnchecked => unchecked(Real * Real + Imaginary * Imaginary);
 
 	/// <inheritdoc/>
-	public readonly T SquareMagnitudeChecked => checked(Real * Real + Imaginary * Imaginary);
+	public readonly T SquareMagnitude => checked(Real * Real + Imaginary * Imaginary);
+
+	/// <inheritdoc/>
+	public readonly T MagnitudeUnchecked => MathUtil.SqrtUnchecked(SquareMagnitudeUnchecked);
 
 	/// <inheritdoc/>
 	public readonly T Magnitude => MathUtil.Sqrt(SquareMagnitude);
-
-	/// <inheritdoc/>
-	public readonly T MagnitudeChecked => MathUtil.SqrtChecked(SquareMagnitudeChecked);
 
 	/// <summary>
 	/// Gets the value representing zero.
@@ -125,15 +125,17 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 
 	#region Operations
 
-	// This is an explicit interface implementation because, unlike all other methods in this struct, it is by default checked, not unchecked.
-	// To avoid confusion with the names, there are instead the properties Magnitude and MagnitudeChecked.
-	static ComplexNumber<T> INumberBase<ComplexNumber<T>>.Abs(ComplexNumber<T> value) => value.MagnitudeChecked;
+	/// <inheritdoc/>
+	public static ComplexNumber<T> Abs(ComplexNumber<T> value) => value.Magnitude;
 
 	/// <inheritdoc/>
 	public static ComplexNumber<T> operator ++(ComplexNumber<T> value)
 	{
-		value.Real++;
-		return value;
+		unchecked
+		{
+			value.Real++;
+			return value;
+		}
 	}
 
 	/// <inheritdoc/>
@@ -149,8 +151,11 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 	/// <inheritdoc/>
 	public static ComplexNumber<T> operator --(ComplexNumber<T> value)
 	{
-		value.Real--;
-		return value;
+		unchecked
+		{
+			value.Real--;
+			return value;
+		}
 	}
 
 	/// <inheritdoc/>
@@ -167,7 +172,7 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 	public static ComplexNumber<T> operator +(ComplexNumber<T> value) => new(+value.Real, +value.Imaginary);
 
 	/// <inheritdoc/>
-	public static ComplexNumber<T> operator -(ComplexNumber<T> value) => new(-value.Real, -value.Imaginary);
+	public static ComplexNumber<T> operator -(ComplexNumber<T> value) => unchecked(new(-value.Real, -value.Imaginary));
 
 	/// <inheritdoc/>
 	public static ComplexNumber<T> operator checked -(ComplexNumber<T> value) => checked(new(-value.Real, -value.Imaginary));
@@ -177,19 +182,22 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 	/// </summary>
 	/// <param name="value">The value for which to calculate the complex conjugate.</param>
 	/// <returns>The complex conjugate of <paramref name="value"/>.</returns>
-	public static ComplexNumber<T> Conjugate(ComplexNumber<T> value) => new(+value.Real, -value.Imaginary);
+	public static ComplexNumber<T> ConjugateUnchecked(ComplexNumber<T> value) => unchecked(new(+value.Real, -value.Imaginary));
 
 	/// <summary>
 	/// Calculates the complex conjugate of a value, in a checked context.
 	/// </summary>
 	/// <param name="value">The value for which to calculate the complex conjugate.</param>
 	/// <returns>The complex conjugate of <paramref name="value"/>.</returns>
-	public static ComplexNumber<T> ConjugateChecked(ComplexNumber<T> value) => checked(new(+value.Real, -value.Imaginary));
+	public static ComplexNumber<T> Conjugate(ComplexNumber<T> value) => checked(new(+value.Real, -value.Imaginary));
 
 	/// <inheritdoc/>
 	public static ComplexNumber<T> operator +(ComplexNumber<T> left, ComplexNumber<T> right)
 	{
-		return new(left.Real + right.Real, left.Imaginary + right.Imaginary);
+		unchecked
+		{
+			return new(left.Real + right.Real, left.Imaginary + right.Imaginary);
+		}
 	}
 
 	/// <inheritdoc/>
@@ -204,7 +212,10 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 	/// <inheritdoc/>
 	public static ComplexNumber<T> operator +(ComplexNumber<T> left, T right)
 	{
-		return new(left.Real + right, left.Imaginary);
+		unchecked
+		{
+			return new(left.Real + right, left.Imaginary);
+		}
 	}
 
 	/// <inheritdoc/>
@@ -219,7 +230,10 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 	/// <inheritdoc cref="IAdditionOperators{TSelf, TOther, TResult}.operator +"/>
 	public static ComplexNumber<T> operator +(T left, ComplexNumber<T> right)
 	{
-		return new(left + right.Real, right.Imaginary);
+		unchecked
+		{
+			return new(left + right.Real, right.Imaginary);
+		}
 	}
 
 	/// <inheritdoc cref="IAdditionOperators{TSelf, TOther, TResult}.operator checked +"/>
@@ -234,7 +248,10 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 	/// <inheritdoc/>
 	public static ComplexNumber<T> operator -(ComplexNumber<T> left, ComplexNumber<T> right)
 	{
-		return new(left.Real - right.Real, left.Imaginary - right.Imaginary);
+		unchecked
+		{
+			return new(left.Real - right.Real, left.Imaginary - right.Imaginary);
+		}
 	}
 
 	/// <inheritdoc/>
@@ -249,7 +266,10 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 	/// <inheritdoc/>
 	public static ComplexNumber<T> operator -(ComplexNumber<T> left, T right)
 	{
-		return new(left.Real - right, left.Imaginary);
+		unchecked
+		{
+			return new(left.Real - right, left.Imaginary);
+		}
 	}
 
 	/// <inheritdoc/>
@@ -264,7 +284,10 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 	/// <inheritdoc cref="ISubtractionOperators{TSelf, TOther, TResult}.operator -"/>
 	public static ComplexNumber<T> operator -(T left, ComplexNumber<T> right)
 	{
-		return new(left - right.Real, right.Imaginary);
+		unchecked
+		{
+			return new(left - right.Real, right.Imaginary);
+		}
 	}
 
 	/// <inheritdoc cref="ISubtractionOperators{TSelf, TOther, TResult}.operator checked -"/>
@@ -279,10 +302,13 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 	/// <inheritdoc/>
 	public static ComplexNumber<T> operator *(ComplexNumber<T> left, ComplexNumber<T> right)
 	{
-		ComplexNumber<T> result;
-		result.Real = left.Real * right.Real - left.Imaginary * right.Imaginary;
-		result.Imaginary = left.Real * right.Imaginary + left.Imaginary * right.Real;
-		return result;
+		unchecked
+		{
+			ComplexNumber<T> result;
+			result.Real = left.Real * right.Real - left.Imaginary * right.Imaginary;
+			result.Imaginary = left.Real * right.Imaginary + left.Imaginary * right.Real;
+			return result;
+		}
 	}
 
 	/// <inheritdoc/>
@@ -300,10 +326,13 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 	/// <inheritdoc/>
 	public static ComplexNumber<T> operator *(ComplexNumber<T> left, T right)
 	{
-		ComplexNumber<T> result;
-		result.Real = left.Real * right;
-		result.Imaginary = left.Imaginary * right;
-		return result;
+		unchecked
+		{
+			ComplexNumber<T> result;
+			result.Real = left.Real * right;
+			result.Imaginary = left.Imaginary * right;
+			return result;
+		}
 	}
 
 	/// <inheritdoc/>
@@ -321,10 +350,13 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 	/// <inheritdoc cref="IMultiplyOperators{TSelf, TOther, TResult}.operator *"/>
 	public static ComplexNumber<T> operator *(T left, ComplexNumber<T> right)
 	{
-		ComplexNumber<T> result;
-		result.Real = left * right.Real;
-		result.Imaginary = left * right.Imaginary;
-		return result;
+		unchecked
+		{
+			ComplexNumber<T> result;
+			result.Real = left * right.Real;
+			result.Imaginary = left * right.Imaginary;
+			return result;
+		}
 	}
 
 	/// <inheritdoc cref="IMultiplyOperators{TSelf, TOther, TResult}.operator checked *"/>
@@ -347,10 +379,13 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 	/// <returns>The product of <paramref name="left"/> and <paramref name="right"/>.</returns>
 	public static Vector<T> operator *(ComplexNumber<T> left, Vector<T> right)
 	{
-		Vector<T> result;
-		result.X = left.Real * right.X + left.Imaginary * right.Y;
-		result.Y = left.Real * right.Y - left.Imaginary * right.X;
-		return result;
+		unchecked
+		{
+			Vector<T> result;
+			result.X = left.Real * right.X + left.Imaginary * right.Y;
+			result.Y = left.Real * right.Y - left.Imaginary * right.X;
+			return result;
+		}
 	}
 
 	/// <summary>
@@ -376,11 +411,14 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 	/// <inheritdoc/>
 	public static ComplexNumber<T> operator /(ComplexNumber<T> left, ComplexNumber<T> right)
 	{
-		T denominator = right.SquareMagnitude;
-		ComplexNumber<T> result;
-		result.Real = (left.Real * right.Real + left.Imaginary * right.Imaginary) / denominator;
-		result.Imaginary = (left.Imaginary * right.Real - left.Real * right.Imaginary) / denominator;
-		return result;
+		unchecked
+		{
+			T denominator = right.SquareMagnitudeUnchecked;
+			ComplexNumber<T> result;
+			result.Real = (left.Real * right.Real + left.Imaginary * right.Imaginary) / denominator;
+			result.Imaginary = (left.Imaginary * right.Real - left.Real * right.Imaginary) / denominator;
+			return result;
+		}
 	}
 
 	/// <inheritdoc/>
@@ -388,7 +426,7 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 	{
 		checked
 		{
-			T denominator = right.SquareMagnitudeChecked;
+			T denominator = right.SquareMagnitude;
 			ComplexNumber<T> result;
 			result.Real = (left.Real * right.Real + left.Imaginary * right.Imaginary) / denominator;
 			result.Imaginary = (left.Imaginary * right.Real - left.Real * right.Imaginary) / denominator;
@@ -399,10 +437,13 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 	/// <inheritdoc/>
 	public static ComplexNumber<T> operator /(ComplexNumber<T> left, T right)
 	{
-		ComplexNumber<T> result;
-		result.Real = left.Real / right;
-		result.Imaginary = left.Imaginary / right;
-		return result;
+		unchecked
+		{
+			ComplexNumber<T> result;
+			result.Real = left.Real / right;
+			result.Imaginary = left.Imaginary / right;
+			return result;
+		}
 	}
 
 	/// <inheritdoc/>
@@ -420,11 +461,14 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 	/// <inheritdoc cref="IDivisionOperators{TSelf, TOther, TResult}.operator /"/>
 	public static ComplexNumber<T> operator /(T left, ComplexNumber<T> right)
 	{
-		T denominator = right.SquareMagnitude;
-		ComplexNumber<T> result;
-		result.Real = left * right.Real / denominator;
-		result.Imaginary = -(left * right.Imaginary / denominator);
-		return result;
+		unchecked
+		{
+			T denominator = right.SquareMagnitudeUnchecked;
+			ComplexNumber<T> result;
+			result.Real = left * right.Real / denominator;
+			result.Imaginary = -(left * right.Imaginary / denominator);
+			return result;
+		}
 	}
 
 	/// <inheritdoc cref="IDivisionOperators{TSelf, TOther, TResult}.operator checked /"/>
@@ -432,7 +476,7 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 	{
 		checked
 		{
-			T denominator = right.SquareMagnitude;
+			T denominator = right.SquareMagnitudeUnchecked;
 			ComplexNumber<T> result;
 			result.Real = left * right.Real / denominator;
 			result.Imaginary = -(left * right.Imaginary / denominator);
@@ -448,7 +492,10 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 	/// <returns>The quotient of <paramref name="left"/> divided by <paramref name="right"/>.</returns>
 	public static Vector<T> operator /(ComplexNumber<T> left, Vector<T> right)
 	{
-		return left * right / right.SquareMagnitude;
+		unchecked
+		{
+			return left * right / right.SquareMagnitudeUnchecked;
+		}
 	}
 
 	/// <summary>
@@ -461,26 +508,29 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 	{
 		checked
 		{
-			return left * right / right.SquareMagnitudeChecked;
+			return left * right / right.SquareMagnitude;
+		}
+	}
+
+	/// <inheritdoc/>
+	public static ComplexNumber<T> ReciprocalUnchecked(ComplexNumber<T> value)
+	{
+		unchecked
+		{
+			T denominator = value.SquareMagnitudeUnchecked;
+			ComplexNumber<T> result;
+			result.Real = value.Real / denominator;
+			result.Imaginary = -(value.Imaginary / denominator);
+			return result;
 		}
 	}
 
 	/// <inheritdoc/>
 	public static ComplexNumber<T> Reciprocal(ComplexNumber<T> value)
 	{
-		T denominator = value.SquareMagnitude;
-		ComplexNumber<T> result;
-		result.Real = value.Real / denominator;
-		result.Imaginary = -(value.Imaginary / denominator);
-		return result;
-	}
-
-	/// <inheritdoc/>
-	public static ComplexNumber<T> ReciprocalChecked(ComplexNumber<T> value)
-	{
 		checked
 		{
-			T denominator = value.SquareMagnitudeChecked;
+			T denominator = value.SquareMagnitude;
 			ComplexNumber<T> result;
 			result.Real = value.Real / denominator;
 			result.Imaginary = -(value.Imaginary / denominator);
@@ -704,7 +754,7 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 	{
 		if (typeof(TOther) == typeof(T))
 		{
-			result = (TOther)(object)(T)value;
+			result = (TOther)(object)unchecked((T)value);
 			return true;
 		}
 		if (typeof(TOther) == typeof(ComplexNumber<T>))
@@ -732,7 +782,7 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 	{
 		if (typeof(TOther) == typeof(T))
 		{
-			result = (TOther)(object)(T)value;
+			result = (TOther)(object)unchecked((T)value);
 			return true;
 		}
 		if (typeof(TOther) == typeof(ComplexNumber<T>))

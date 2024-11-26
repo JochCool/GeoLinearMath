@@ -12,25 +12,25 @@ public interface IQuantity<TResult>
 	/// <summary>
 	/// Gets the square of the magnitude of this quantity in an unchecked context.
 	/// </summary>
-	TResult SquareMagnitude { get; }
+	TResult SquareMagnitudeUnchecked { get; }
 
 	/// <summary>
 	/// Gets the square of the magnitude of this quantity in a checked context.
 	/// </summary>
 	/// <exception cref="OverflowException">The result is not representable by <typeparamref name="TResult"/>.</exception>
-	TResult SquareMagnitudeChecked => SquareMagnitude;
+	TResult SquareMagnitude => SquareMagnitudeUnchecked;
 
 	/// <summary>
 	/// Gets the magnitude (or absolute value) of this quantity in an unchecked context.
 	/// </summary>
 	/// <remarks>
-	/// <para>It is typically cheaper to calculate the square of the magnitude instead, so consider using <see cref="SquareMagnitude"/> for comparisons.</para>
+	/// <para>It is typically cheaper to calculate the square of the magnitude instead, so consider using <see cref="SquareMagnitudeUnchecked"/> for comparisons.</para>
 	/// </remarks>
-	TResult Magnitude => MathUtil.Sqrt(SquareMagnitude);
+	TResult MagnitudeUnchecked => MathUtil.SqrtUnchecked(SquareMagnitudeUnchecked);
 
 	/// <summary>
 	/// Gets the magnitude (or absolute value) of this quantity in a checked context.
 	/// </summary>
 	/// <exception cref="OverflowException">The result is not representable by <typeparamref name="TResult"/>.</exception>
-	TResult MagnitudeChecked => MathUtil.SqrtChecked(MagnitudeChecked);
+	TResult Magnitude => MathUtil.Sqrt(Magnitude);
 }

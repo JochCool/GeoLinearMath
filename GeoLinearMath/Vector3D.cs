@@ -68,22 +68,22 @@ public struct Vector3D<T> : IVector<Vector3D<T>, T>
 	readonly IEnumerable<T> IVector<Vector3D<T>, T>.Components => [X, Y, Z];
 
 	/// <inheritdoc/>
-	public readonly T SquareMagnitude => X * X + Y * Y + Z * Z;
+	public readonly T SquareMagnitudeUnchecked => unchecked(X * X + Y * Y + Z * Z);
 
 	/// <inheritdoc/>
-	public readonly T SquareMagnitudeChecked => checked(X * X + Y * Y + Z * Z);
+	public readonly T SquareMagnitude => checked(X * X + Y * Y + Z * Z);
+
+	/// <inheritdoc/>
+	public readonly T MagnitudeUnchecked => MathUtil.SqrtUnchecked(SquareMagnitudeUnchecked);
 
 	/// <inheritdoc/>
 	public readonly T Magnitude => MathUtil.Sqrt(SquareMagnitude);
 
 	/// <inheritdoc/>
-	public readonly T MagnitudeChecked => MathUtil.SqrtChecked(SquareMagnitudeChecked);
+	public readonly T TaxicabMagnitudeUnchecked => unchecked((T.IsNegative(X) ? -X : X) + (T.IsNegative(Y) ? -Y : Y) + (T.IsNegative(Z) ? -Z : Z)); // can't use T.Abs because it needs to be unchecked
 
 	/// <inheritdoc/>
-	public readonly T TaxicabMagnitude => (T.IsNegative(X) ? -X : X) + (T.IsNegative(Y) ? -Y : Y) + (T.IsNegative(Z) ? -Z : Z); // can't use T.Abs because it needs to be unchecked
-
-	/// <inheritdoc/>
-	public readonly T TaxicabMagnitudeChecked => checked(T.Abs(X) + T.Abs(Y) + T.Abs(Z));
+	public readonly T TaxicabMagnitude => checked(T.Abs(X) + T.Abs(Y) + T.Abs(Z));
 
 	static int IVector<Vector3D<T>, T>.Dimension => 3;
 
@@ -197,7 +197,7 @@ public struct Vector3D<T> : IVector<Vector3D<T>, T>
 	public static Vector3D<T> operator +(Vector3D<T> value) => new Vector3D<T>(+value.X, +value.Y, +value.Z);
 
 	/// <inheritdoc/>
-	public static Vector3D<T> operator -(Vector3D<T> value) => new Vector3D<T>(-value.X, -value.Y, -value.Z);
+	public static Vector3D<T> operator -(Vector3D<T> value) => unchecked(new Vector3D<T>(-value.X, -value.Y, -value.Z));
 
 	/// <inheritdoc/>
 	public static Vector3D<T> operator checked -(Vector3D<T> value) => checked(new Vector3D<T>(-value.X, -value.Y, -value.Z));
@@ -205,7 +205,10 @@ public struct Vector3D<T> : IVector<Vector3D<T>, T>
 	/// <inheritdoc/>
 	public static Vector3D<T> operator +(Vector3D<T> left, Vector3D<T> right)
 	{
-		return new Vector3D<T>(left.X + right.X, left.Y + right.Y, left.Z + right.Z);
+		unchecked
+		{
+			return new Vector3D<T>(left.X + right.X, left.Y + right.Y, left.Z + right.Z);
+		}
 	}
 
 	/// <inheritdoc/>
@@ -220,7 +223,10 @@ public struct Vector3D<T> : IVector<Vector3D<T>, T>
 	/// <inheritdoc/>
 	public static Vector3D<T> operator -(Vector3D<T> left, Vector3D<T> right)
 	{
-		return new Vector3D<T>(left.X - right.X, left.Y - right.Y, left.Z + right.Z);
+		unchecked
+		{
+			return new Vector3D<T>(left.X - right.X, left.Y - right.Y, left.Z + right.Z);
+		}
 	}
 
 	/// <inheritdoc/>
@@ -235,7 +241,10 @@ public struct Vector3D<T> : IVector<Vector3D<T>, T>
 	/// <inheritdoc cref="Vector{T}.operator *(Vector{T}, T)"/>
 	public static Vector3D<T> operator *(Vector3D<T> left, T right)
 	{
-		return new Vector3D<T>(left.X * right, left.Y * right, left.Z * right);
+		unchecked
+		{
+			return new Vector3D<T>(left.X * right, left.Y * right, left.Z * right);
+		}
 	}
 
 	/// <inheritdoc cref="Vector{T}.operator checked *(Vector{T}, T)"/>
@@ -250,7 +259,10 @@ public struct Vector3D<T> : IVector<Vector3D<T>, T>
 	/// <inheritdoc cref="Vector{T}.operator *(T, Vector{T})"/>
 	public static Vector3D<T> operator *(T left, Vector3D<T> right)
 	{
-		return new Vector3D<T>(left * right.X, left * right.Y, left * right.Z);
+		unchecked
+		{
+			return new Vector3D<T>(left * right.X, left * right.Y, left * right.Z);
+		}
 	}
 
 	/// <inheritdoc cref="Vector{T}.operator checked *(T, Vector{T})"/>
@@ -265,7 +277,10 @@ public struct Vector3D<T> : IVector<Vector3D<T>, T>
 	/// <inheritdoc cref="Vector{T}.operator /(Vector{T}, T)"/>
 	public static Vector3D<T> operator /(Vector3D<T> left, T right)
 	{
-		return new Vector3D<T>(left.X / right, left.Y / right, left.Z / right);
+		unchecked
+		{
+			return new Vector3D<T>(left.X / right, left.Y / right, left.Z / right);
+		}
 	}
 
 	/// <inheritdoc cref="Vector{T}.operator checked /(Vector{T}, T)"/>
@@ -280,7 +295,10 @@ public struct Vector3D<T> : IVector<Vector3D<T>, T>
 	/// <inheritdoc cref="Vector{T}.operator /(T, Vector{T})"/>
 	public static Vector3D<T> operator /(T left, Vector3D<T> right)
 	{
-		return left * right / right.SquareMagnitude;
+		unchecked
+		{
+			return left * right / right.SquareMagnitudeUnchecked;
+		}
 	}
 
 	/// <inheritdoc cref="Vector{T}.operator checked /(T, Vector{T})"/>
@@ -288,33 +306,39 @@ public struct Vector3D<T> : IVector<Vector3D<T>, T>
 	{
 		checked
 		{
-			return left * right / right.SquareMagnitudeChecked;
+			return left * right / right.SquareMagnitude;
+		}
+	}
+
+	/// <inheritdoc cref="Vector{T}.ReciprocalUnchecked(Vector{T})"/>
+	public static Vector3D<T> ReciprocalUnchecked(Vector3D<T> value)
+	{
+		unchecked
+		{
+			return value / value.SquareMagnitudeUnchecked;
 		}
 	}
 
 	/// <inheritdoc cref="Vector{T}.Reciprocal(Vector{T})"/>
 	public static Vector3D<T> Reciprocal(Vector3D<T> value)
 	{
-		return value / value.SquareMagnitude;
-	}
-
-	/// <inheritdoc cref="Vector{T}.ReciprocalChecked(Vector{T})"/>
-	public static Vector3D<T> ReciprocalChecked(Vector3D<T> value)
-	{
 		checked
 		{
-			return value / value.SquareMagnitudeChecked;
+			return value / value.SquareMagnitude;
+		}
+	}
+
+	/// <inheritdoc/>
+	public static T DotUnchecked(Vector3D<T> left, Vector3D<T> right)
+	{
+		unchecked
+		{
+			return left.X * right.X + left.Y * right.Y + left.Z * right.Z;
 		}
 	}
 
 	/// <inheritdoc/>
 	public static T Dot(Vector3D<T> left, Vector3D<T> right)
-	{
-		return left.X * right.X + left.Y * right.Y + left.Z * right.Z;
-	}
-
-	/// <inheritdoc/>
-	public static T DotChecked(Vector3D<T> left, Vector3D<T> right)
 	{
 		checked
 		{

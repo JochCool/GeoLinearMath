@@ -15,7 +15,7 @@ public interface IMultiplicativeInverse<TSelf, TResult>
 	/// </summary>
 	/// <param name="value">The value for which to calculate the multiplicative inverse.</param>
 	/// <returns>The multiplicative inverse of <paramref name="value"/>.</returns>
-	static abstract TResult Reciprocal(TSelf value);
+	static abstract TResult ReciprocalUnchecked(TSelf value);
 
 	/// <summary>
 	/// Calculates the multiplicative inverse of a value in a checked context.
@@ -23,5 +23,5 @@ public interface IMultiplicativeInverse<TSelf, TResult>
 	/// <param name="value">The value for which to calculate the multiplicative inverse.</param>
 	/// <returns>The multiplicative inverse of <paramref name="value"/>.</returns>
 	/// <exception cref="OverflowException">The result is not representable by <typeparamref name="TResult"/>.</exception>
-	static virtual TResult ReciprocalChecked(TSelf value) => TSelf.Reciprocal(value);
+	static virtual TResult Reciprocal(TSelf value) => TSelf.ReciprocalUnchecked(value);
 }
