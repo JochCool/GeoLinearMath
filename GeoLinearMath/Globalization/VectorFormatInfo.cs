@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 
-namespace GeoLinearMath;
+namespace GeoLinearMath.Globalization;
 
 /// <summary>
 /// Provides information for formatting vectors.

@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 
-namespace GeoLinearMath;
+namespace GeoLinearMath.Globalization;
 
 internal static class StringUtil
 {
