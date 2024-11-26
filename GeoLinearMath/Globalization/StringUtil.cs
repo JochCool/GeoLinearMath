@@ -82,6 +82,6 @@ internal static class StringUtil
 		{
 			return default;
 		}
-		return chars[opening.Length..closing.Length];
+		return chars[opening.Length..^closing.Length];
 	}
 }
