@@ -606,7 +606,7 @@ public struct Vector<T> : IVector<Vector<T>, T>,
 	/// <inheritdoc/>
 	public readonly bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
 	{
-		return StringUtil.TryFormatVector(destination, out charsWritten, [X, Y], format, provider);
+		return VectorFormatInfo.GetInstance(provider).TryFormat(destination, out charsWritten, [X, Y], format);
 	}
 
 	/// <summary>
@@ -660,24 +660,21 @@ public struct Vector<T> : IVector<Vector<T>, T>,
 	/// <returns><see langword="true"/> if the vector was successfully parsed; otherwise, <see langword="false"/>.</returns>
 	public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, out Vector<T> result)
 	{
-		VectorFormatInfo vectorFormatInfo = VectorFormatInfo.GetInstance(provider);
+		VectorFormatInfo formatInfo = VectorFormatInfo.GetInstance(provider);
 
-		s = StringUtil.RemoveOpeningAndClosing(s, vectorFormatInfo);
+		// Cannot stackalloc, because T can be a managed type.
+		// So create an inline array with arbitrary values instead.
+		// The method below will make sure the values are properly initialized.
+		Span<T> components = [default!, default!];
 
-		ReadOnlySpan<char> separator = vectorFormatInfo.Separator;
+		if (formatInfo.TryParse(s, components))
+		{
+			result = Create(components);
+			return true;
+		}
 
 		result = default;
-
-		int separatorIndex = s.IndexOf(separator);
-		if (separatorIndex == -1) return false;
-
-		ReadOnlySpan<char> xSpan = s[..separatorIndex];
-		ReadOnlySpan<char> ySpan = s[(separatorIndex + 1)..];
-
-		if (ySpan.IndexOf(separator) != -1) return false;
-
-		return T.TryParse(xSpan, provider, out result.X!)
-			&& T.TryParse(ySpan, provider, out result.Y!);
+		return false;
 	}
 
 	#endregion

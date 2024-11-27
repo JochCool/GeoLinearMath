@@ -826,25 +826,7 @@ public struct ComplexNumber<T> : INumberBase<ComplexNumber<T>>,
 
 	public readonly bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
 	{
-		if (T.IsZero(Imaginary))
-		{
-			return TryFormat(destination, out charsWritten, format, provider);
-		}
-
-		charsWritten = 0;
-
-		ComplexNumberFormatInfo formatInfo = ComplexNumberFormatInfo.GetInstance(provider);
-
-		if (!T.IsZero(Real))
-		{
-			if (!StringUtil.TryFormatValue(ref destination, ref charsWritten, Real, format, formatInfo.NumberFormat)) return false;
-			if (!StringUtil.TryFormatString(ref destination, ref charsWritten, formatInfo.Operator)) return false;
-		}
-
-		if (!StringUtil.TryFormatValue(ref destination, ref charsWritten, Imaginary, format, formatInfo.NumberFormat)) return false;
-		if (!StringUtil.TryFormatString(ref destination, ref charsWritten, formatInfo.ImaginaryUnit)) return false;
-
-		return true;
+		return ComplexNumberFormatInfo.GetInstance(provider).TryFormat(destination, out charsWritten, this, format);
 	}
 
 	public static ComplexNumber<T> Parse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider)

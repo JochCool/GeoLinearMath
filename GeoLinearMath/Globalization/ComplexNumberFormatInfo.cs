@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Numerics;
 
 namespace GeoLinearMath.Globalization;
 
@@ -50,6 +51,29 @@ public class ComplexNumberFormatInfo : CompositeFormatInfo, ICompositeFormatInfo
 	/// <returns>The <see cref="ComplexNumberFormatInfo"/> instance associated with <paramref name="formatProvider"/>. This may be the same instance.</returns>
 	public static ComplexNumberFormatInfo GetInstance(IFormatProvider? formatProvider)
 	{
-		return StringUtil.GetFormatInfo<ComplexNumberFormatInfo>(formatProvider);
+		return ICompositeFormatInfo<ComplexNumberFormatInfo>.Resolve(formatProvider);
+	}
+
+	internal bool TryFormat<T>(Span<char> destination, out int charsWritten, ComplexNumber<T> number, ReadOnlySpan<char> format)
+		where T : INumber<T>
+	{
+		// simple case for real numbers
+		if (T.IsZero(number.Imaginary))
+		{
+			return number.Real.TryFormat(destination, out charsWritten, format, NumberFormat);
+		}
+
+		charsWritten = 0;
+
+		if (!T.IsZero(number.Real))
+		{
+			if (!TryFormatValue(ref destination, ref charsWritten, number.Real, format, NumberFormat)) return false;
+			if (!TryFormatString(ref destination, ref charsWritten, Operator)) return false;
+		}
+
+		if (!TryFormatValue(ref destination, ref charsWritten, number.Imaginary, format, NumberFormat)) return false;
+		if (!TryFormatString(ref destination, ref charsWritten, ImaginaryUnit)) return false;
+
+		return true;
 	}
 }
